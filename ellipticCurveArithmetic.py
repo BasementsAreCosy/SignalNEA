@@ -1,7 +1,42 @@
+from math import *
+
+class Point:
+    def __init__(self, x=float('inf'), y=float('inf')):
+        self.__x = x
+        self.__y = y
+
+    def __str__(self):
+        return 'Point: Zero' if self.isZero() else f'Point: ({self.__x}, {self.__y})'
+
+    def getPoint(self):
+        return (self.__x, self.__y)
+
+    def getCopy(self):
+        return Point(self.__x, self.__y)
+
+    def isZero(self):
+        return self.__x > 10**20 or self.__x < -(10**20)
+
+    def negate(self):
+        return Point(self.__x, -self.__y)
+
+
 class EllipticCurve:
-    def __init__(self, a=486662, b=1):
+    def __init__(self, basePoint = Point(9, 14781619447589544791020593568409986887264606134616475288964881837755586237401), a=486662, b=1, p=(2**255)-19):
+        # self.basePoint = basePoint
+        # self.identityPoint = identityPoint
+        # self.p = fieldPrime
+        # self.order = order
+        # self.cofactor = cofactor
+        # self.twistedEdwardsCurveConst = twistedEdwardsCurveConst
+        # self.montCurveConst = montCurveConst
+        # self.nonSquare = nonSquare
+        # self.somethingP = ceil(log(self.fieldPrime, 2)) # todo: More appropriate name
+        # self.somethingQ = ceil(log(self.order, 2)) # todo: More appropriate name
+        # self.bitLength = 8*(ceil((self.somethingP+1)/8))
         self.a = a
         self.b = b
+
 
     def __str__(self):
         return f'Elliptic curve parameters:\na = {self.a}\nb = {self.b}'
@@ -47,26 +82,6 @@ class EllipticCurve:
             x = -((-n)**(1./3))
         return Point(x, y)
 
-
-class Point:
-    def __init__(self, x=float('inf'), y=float('inf')):
-        self.__x = x
-        self.__y = y
-
-    def __str__(self):
-        return 'Point: Zero' if self.isZero() else f'Point: ({self.__x}, {self.__y})'
-
-    def getPoint(self):
-        return (self.__x, self.__y)
-
-    def getCopy(self):
-        return Point(self.__x, self.__y)
-
-    def isZero(self):
-        return self.__x > 10**20 or self.__x < -(10**20)
-
-    def negate(self):
-        return Point(self.__x, -self.__y)
 
 if __name__ == '__main__':
     curve = EllipticCurve(0, 7)
