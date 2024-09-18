@@ -1,5 +1,9 @@
 from math import *
 
+# todo: By^2 = x^3 + Ax^2 + x   -   Montgomery Curve
+# todo: ax^2 + y^2 = 1 + d(x^2)(y^2)
+
+
 class Point:
     def __init__(self, x=float('inf'), y=float('inf')):
         self.__x = x
@@ -8,7 +12,7 @@ class Point:
     def __str__(self):
         return 'Point: Zero' if self.isZero() else f'Point: ({self.__x}, {self.__y})'
 
-    def getPoint(self):
+    def getPointTuple(self):
         return (self.__x, self.__y)
 
     def getCopy(self):
@@ -22,37 +26,25 @@ class Point:
 
 
 class EllipticCurve:
-    def __init__(self, basePoint = Point(9, 14781619447589544791020593568409986887264606134616475288964881837755586237401), a=486662, b=1, p=(2**255)-19):
-        # self.basePoint = basePoint
-        # self.identityPoint = identityPoint
-        # self.p = fieldPrime
-        # self.order = order
-        # self.cofactor = cofactor
-        # self.twistedEdwardsCurveConst = twistedEdwardsCurveConst
-        # self.montCurveConst = montCurveConst
-        # self.nonSquare = nonSquare
-        # self.somethingP = ceil(log(self.fieldPrime, 2)) # todo: More appropriate name
-        # self.somethingQ = ceil(log(self.order, 2)) # todo: More appropriate name
-        # self.bitLength = 8*(ceil((self.somethingP+1)/8))
+    def __init__(self, a=486662, b=1):
         self.a = a
         self.b = b
-
 
     def __str__(self):
         return f'Elliptic curve parameters:\na = {self.a}\nb = {self.b}'
 
     def addPoints(self, point1, point2):
-        if point1.getPoint() == point2.getPoint():
+        if point1.getPointTuple() == point2.getPointTuple():
             return self.doublePoint(point1)
         if point1.isZero():
             return point2
         if point2.isZero():
             return point1
-        if point2.getPoint()[0] - point1.getPoint()[0] == 0:
+        if point2.getPointTuple()[0] - point1.getPointTuple()[0] == 0:
             return Point()
-        L = (point2.getPoint()[1] - point1.getPoint()[1]) / (point2.getPoint()[0] - point1.getPoint()[0])
-        x = (L**2) - point1.getPoint()[0] - point2.getPoint()[0]
-        return Point(x, L*(point1.getPoint()[0] - x) - point1.getPoint()[1])
+        L = (point2.getPointTuple()[1] - point1.getPointTuple()[1]) / (point2.getPointTuple()[0] - point1.getPointTuple()[0])
+        x = (L**2) - point1.getPointTuple()[0] - point2.getPointTuple()[0]
+        return Point(x, L * (point1.getPointTuple()[0] - x) - point1.getPointTuple()[1])
 
     def multiplyPoints(self, point1, scalar):
         pointCopy = point1.getCopy()
@@ -68,11 +60,11 @@ class EllipticCurve:
     def doublePoint(self, point):
         if point.isZero():
             return point
-        if point.getPoint()[1] == 0:
+        if point.getPointTuple()[1] == 0:
             return Point()
-        L = 3 * (point.getPoint()[0]**2) / (2 * point.getPoint()[1])
-        x = (L**2) - (2 * point.getPoint()[0])
-        return Point(x, L * (point.getPoint()[0] - x) - point.getPoint()[1])
+        L = 3 * (point.getPointTuple()[0] ** 2) / (2 * point.getPointTuple()[1])
+        x = (L**2) - (2 * point.getPointTuple()[0])
+        return Point(x, L * (point.getPointTuple()[0] - x) - point.getPointTuple()[1])
 
     def pointFromY(self, y):
         n = y**2 - self.b
@@ -83,8 +75,21 @@ class EllipticCurve:
         return Point(x, y)
 
 
+class MontgomeryCurve:
+    def __init__(self, A, B):
+        # Form: By^2 = x^3 + Ax^2 + x
+        self.A = A
+        self.B = B
+
+    def addPoints(self, point1, point2):
+        x1, y1 = point1.getPointTuple()
+        x2, y2 = point2.getPointTuple()
+
+        return Point((self.B*((y2-y1)**2))/((x2-x1)**2)-self.A-x1-x2, # x
+                     (((2*x1+x2+self.A)*(y2-y1))/(x2-x1))-((self.B*((y2-y1)**3))/((x2-x1)**3))-y1) # y
+
 if __name__ == '__main__':
-    curve = EllipticCurve(0, 7)
+    curve = MontgomeryCurve(2, 3)
     pointA = curve.pointFromY(1)
     pointB = curve.pointFromY(2)
     print('a = ' + str(pointA))
