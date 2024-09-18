@@ -1,7 +1,7 @@
 from math import *
 
-# todo: By^2 = x^3 + Ax^2 + x   -   Montgomery Curve
-# todo: ax^2 + y^2 = 1 + d(x^2)(y^2)
+# todo: By^2 = x^3 + Ax^2 + x          -   Montgomery Curve
+# todo: ax^2 + y^2 = 1 + d(x^2)(y^2)   -   Twisted Edwards Curve
 
 
 class Point:
@@ -76,10 +76,11 @@ class EllipticCurve:
 
 
 class MontgomeryCurve:
-    def __init__(self, A, B):
+    def __init__(self, A, B, p):
         # Form: By^2 = x^3 + Ax^2 + x
         self.A = A
         self.B = B
+        self.p = p
 
     def addPoints(self, point1, point2):
         x1, y1 = point1.getPointTuple()
@@ -88,17 +89,18 @@ class MontgomeryCurve:
         return Point((self.B*((y2-y1)**2))/((x2-x1)**2)-self.A-x1-x2, # x
                      (((2*x1+x2+self.A)*(y2-y1))/(x2-x1))-((self.B*((y2-y1)**3))/((x2-x1)**3))-y1) # y
 
+
 if __name__ == '__main__':
-    curve = MontgomeryCurve(2, 3)
-    pointA = curve.pointFromY(1)
-    pointB = curve.pointFromY(2)
+    curve = MontgomeryCurve(2, 3, 7)
+    pointA = Point(0.04, 0.208)
+    pointB = Point(1, 4)
     print('a = ' + str(pointA))
     print('b = ' + str(pointB))
     pointC = curve.addPoints(pointA, pointB)
     print('c = ' + str(pointC))
-    pointD = pointC.negate()
-    print('d = ' + str(pointD))
-    print('c + d = ' + str(curve.addPoints(pointC, pointD)))
-    print('a + b + d = ' + str(curve.addPoints(pointA, curve.addPoints(pointB, pointD))))
-    print('a * 12345 = ', str(curve.multiplyPoints(pointA, 12345)))
+    #pointD = pointC.negate()
+    #print('d = ' + str(pointD))
+    #print('c + d = ' + str(curve.addPoints(pointC, pointD)))
+    #print('a + b + d = ' + str(curve.addPoints(pointA, curve.addPoints(pointB, pointD))))
+    #print('a * 12345 = ', str(curve.multiplyPoints(pointA, 12345)))
 
