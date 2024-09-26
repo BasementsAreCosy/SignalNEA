@@ -1,3 +1,4 @@
 Signal Documentation - https://signal.org/docs/
 Elliptic Curve Geometry - https://rosettacode.org/wiki/Elliptic_curve_arithmetic#:~:text=In%20a%20nutshell%2C%20an%20elliptic,specific%20curve%20which%20is%20used.
 Montgomery Curve Geometry - https://en.wikipedia.org/wiki/Montgomery_curve
+Point Scalar Multiplication - https://en.wikipedia.org/wiki/Elliptic_curve_point_multiplication
