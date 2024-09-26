@@ -33,6 +33,16 @@ class MontgomeryCurve:
         self.p = p # Curve25519 - (2**255)-19
         self.bits = bits # Curve25519 - 256
 
+    def encodeUCoordinate(self, u):
+        return encodeLittleEndian(u%self.p, self.bits)
+
+    def decodeUCoordinate(self, u):
+        uBitsList = [b for b in u]
+
+        if bits % 8 != 0:
+            uBitsList[-1] &= (1 << (self.bits % 8)) - 1
+        return decodeLittleEndian(uBitsList, self.bits)
+
     def addPoints(self, point1, point2):
         x1, y1 = point1.getPointTuple()
         x2, y2 = point2.getPointTuple()
@@ -66,12 +76,34 @@ class MontgomeryCurve:
     def scalarMultiple(self, point, scalar):
         r0 = 0
         r1 = self.p
-        for i in range(5, -1, -1):
-            pass
+        for i in range(self.bits-1, -1, -1):
+            A = X2 + Z2
+            AA = A ^ 2 # todo: cleanup
+            B = X2 - Z2
+            BB = B ^ 2
+            E = AA - BB
+            C = X3 + Z3
+            D = X3 - Z3
+            DA = D * A
+            CB = C * B
+            t0 = DA + CB
+            X5 = t0 ^ 2
+            t1 = DA - CB
+            t2 = t1 ^ 2
+            Z5 = X1 * t2
+            X4 = AA * BB
+            t3 = a24 * E
+            t4 = BB + t3
+            Z4 = E * t4
 
 def inverseMod(a, p):
     return pow(a, p-2, p)
 
+def encodeLittleEndian(n, bits):
+    return bytes([(n >> 8 * i) & 0xff for i in range((bits + 7) // 8)])
+
+def decodeLittleEndian():
+    return sum([b[i] << 8 * i for i in range((bits+7) // 8)])
 
 if __name__ == '__main__':
     curve = MontgomeryCurve(486662, 1, (2**255)-19, 256)
