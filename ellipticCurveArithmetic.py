@@ -33,10 +33,10 @@ class MontgomeryCurve:
         self.B = B # Curve25519 - 1
         self.p = p # Curve25519 - (2**255)-19
         self.bits = bits # Curve25519 - 256
-        self.basePoint = Point(self.encodeUCoordinate(9), self.uToY(9%(2**255)))
+        self.basePoint = Point(9, self.uToY(9%(2**255)))
 
     def generatePublicKey(self, privateKey):
-        return self.scalarMultiple(self.basePoint, privateKey)
+        return self.bscalarMultiple(self.basePoint, privateKey)
 
     def encodeUCoordinate(self, u):
         return encodeLittleEndian(u%self.p, self.bits)
@@ -56,6 +56,10 @@ class MontgomeryCurve:
             return self.doublePoint(point1)
         elif x1 == x2:
             return Point()
+        elif point1.isZero():
+            return point2
+        elif point2.isZero():
+            return point1
 
         try:
             z = (y2 - y1) * inverseMod(x2 - x1, self.p) % self.p
@@ -90,8 +94,20 @@ class MontgomeryCurve:
                 r0 = self.addPoints(r0, r1)
                 r1 = self.doublePoint(r1)
 
-            assert r1 == self.addPoints(r0, point)
+            assert r1.getPointTuple() == self.addPoints(r0, point).getPointTuple()
         return r0
+
+    def bscalarMultiple(self, point, scalar):
+        scalarDE = decodeLittleEndian(scalar, self.bits)
+        r0 = Point()
+        i = 1
+        while i <= scalarDE:
+            if i&scalarDE:
+                r0 = self.addPoints(r0, point)
+            point = self.doublePoint(point)
+            i <<= 1
+        return r0
+
 
     def uToY(self, u):
         return ((u - 1) * inverseMod(u+1, self.p))%self.p
@@ -118,5 +134,5 @@ def decodeLittleEndian(b, bits):
 if __name__ == '__main__':
     curve = MontgomeryCurve(486662, 1, (2**255)-19, 256)
     sk = generatePrivateKey()
-    pk = curve.generatePublicKey(sk)
+    pk = curve.generatePublicKey(encodeLittleEndian(7, 256))
     print(f'sk: {sk}\npk: {pk}')
