@@ -5,6 +5,7 @@ class Curve25519:
         self.p = (2**255)-19
         self.a24 = (486662 - 2) // 4
         self.bits = 256
+        self.basePoint = self.encodeUCoordinate(9)
 
     def decodeUCoordinate(self, u: bytes):
         u_list = [b for b in u]
@@ -54,15 +55,18 @@ class Curve25519:
         z2, z3 = cswap(swap, z2, z3)
         return self.encodeUCoordinate((x2 * pow(z2, self.p-2, self.p)) % self.p)
 
+    def baseScalarMultiplication(self, k: bytes):
+        return self.scalarMultiplication(k, self.basePoint)
+
 if __name__ == '__main__':
     curve = Curve25519()
 
     basePoint = curve.encodeUCoordinate(9)
 
-    As = 7
+    As = 123456
     Ap = curve.scalarMultiplication(encodeLittleEndian(As, 256), basePoint)
 
-    Bs = 5
+    Bs = 654321
     Bp = curve.scalarMultiplication(encodeLittleEndian(Bs, 256), basePoint)
 
     ASs = curve.decodeUCoordinate(curve.scalarMultiplication(encodeLittleEndian(As, 256), Bp))
